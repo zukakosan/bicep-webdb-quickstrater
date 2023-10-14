@@ -43,18 +43,6 @@ module createAzureBastion './modules/bastion.bicep' = if(deployBastion) {
   ]
 }
 
-// create Application Gateway
-module createAppGw './modules/appgw.bicep' = {
-  name: 'createAppGw'
-  params: {
-    location: location
-    appGwVnetName: vnetName
-  }
-  dependsOn: [
-    createVnet
-  ]
-}
-
 // create web vms
 module createWebVms './modules/vm.bicep' = [for i in range(1, webVmCount):{
   name: 'createWebVm-${i}'
@@ -69,6 +57,19 @@ module createWebVms './modules/vm.bicep' = [for i in range(1, webVmCount):{
     installApache: installApache
   }
 }]
+
+// create Application Gateway
+module createAppGw './modules/appgw.bicep' = {
+  name: 'createAppGw'
+  params: {
+    location: location
+    appGwVnetName: vnetName
+    backendVmPrivateIps: [for i in range(0, webVmCount): createWebVms[i].outputs.vmPrivateIp]
+  }
+  dependsOn: [
+    createVnet
+  ]
+}
 
 // create internal load balancer
 // create postgreSQL with private endpoints

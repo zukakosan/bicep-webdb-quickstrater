@@ -1,5 +1,6 @@
 param location string
 param appGwVnetName string
+param backendVmPrivateIps array
 
 var appGwAddressPrefix = '10.0.0.0/24'
 var appGwSubnetName = 'appgw-subnet'
@@ -68,6 +69,14 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
     backendAddressPools: [
       {
         name: 'http-backend'
+        // ここにバックエンドのVMのプライベートIPを指定する
+        properties: {
+          backendAddresses: [
+            for ip in backendVmPrivateIps: {
+                ipAddress: ip
+            }
+          ]
+        }
       }
     ]
     backendHttpSettingsCollection: [

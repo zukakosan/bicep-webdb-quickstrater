@@ -95,5 +95,5 @@ resource vmInstallApache 'Microsoft.Compute/virtualMachines/extensions@2023-03-0
   }
 }
 
-// @description('return the private ip address of the vm to use from parent template')
-// output vmPrivateIp string = networkInterface.properties.ipConfigurations[0].properties.privateIPAddress
+@description('return the private ip address of the vm to use from parent template')
+output vmPrivateIp string = networkInterface.properties.ipConfigurations[0].properties.privateIPAddress
