@@ -1,11 +1,15 @@
 param location string = resourceGroup().location
+
 @allowed([
   'Enabled'
   'Disabled'
 ])
+@description('Enable or disable Azure Bastion. If enabled, Azure Bastion will be deployed in the same VNet as the web VMs. If disabled, you will need to connect to the web VMs using a public IP address.')
 param bastionEnabled string 
+
 @minValue(1)
 @maxValue(3)
+@description('Number of web VMs to deploy.')
 param webVmCount int = 2
 
 param adminUsername string
@@ -13,9 +17,10 @@ param adminUsername string
 param adminPassword string
 
 var vnetName = 'vnet-webdb'
+@description('The bool variable to determine if Azure Bastion should be deployed.')
 var deployBastion = bastionEnabled == 'Enabled'
 
-// create Vnet
+// create virtual network
 module createVnet './modules/vnet.bicep' = {
   name: 'createVnet'
   params: {
@@ -24,19 +29,7 @@ module createVnet './modules/vnet.bicep' = {
   }
 }
 
-// deploy Azure Bastion if needed
-module createAzureBastion './modules/bastion.bicep' = if(deployBastion) {
-  name: 'deployAzureBastion'
-  params: {
-    location: location
-    bastionVnetName: vnetName
-  }
-  dependsOn: [
-    createVnet
-  ]
-}
-
-// create web vms
+// create web server vms
 module createWebVms './modules/vm.bicep' = [for i in range(1, webVmCount):{
   name: 'createWebVm-${i}'
   params: {
@@ -55,7 +48,7 @@ module createAppGw './modules/appgw.bicep' = {
   name: 'createAppGw'
   params: {
     location: location
-    appGwVnetName: vnetName
+    appGwSubnetId: createVnet.outputs.appGwSubnetId
     backendVmPrivateIps: [for i in range(0, webVmCount): createWebVms[i].outputs.vmPrivateIp]
   }
   dependsOn: [
@@ -63,7 +56,6 @@ module createAppGw './modules/appgw.bicep' = {
   ]
 }
 
-// not need create internal load balancer
 // create postgreSQL with private endpoints
 module createPostgreSql './modules/postgreSql.bicep' = {
   name: 'createPostgreSql'
@@ -75,6 +67,18 @@ module createPostgreSql './modules/postgreSql.bicep' = {
     serverName: 'postgresql-${take(uniqueString(resourceGroup().id),4)}'
     linkedVnetId: createVnet.outputs.webDbVnetId
     dbSubnetId: createVnet.outputs.dbSubnetId
+  }
+  dependsOn: [
+    createVnet
+  ]
+}
+
+// deploy Azure Bastion if needed to connect to web VMs for administration
+module createAzureBastion './modules/bastion.bicep' = if(deployBastion) {
+  name: 'deployAzureBastion'
+  params: {
+    location: location
+    bastionVnetName: vnetName
   }
   dependsOn: [
     createVnet

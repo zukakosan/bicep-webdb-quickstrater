@@ -1,8 +1,7 @@
 param location string
-// param installApache bool
-// param deployAzureBastion bool
 param vnetName string
 
+var appgwSubnetName = 'subnet-appgw'
 var webSubnetName = 'subnet-web'
 var dbSubnetName = 'subnet-db'
 
@@ -63,12 +62,12 @@ resource webDbVnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
       ]
     }
     subnets: [
-      // {
-      //   name: appgwSubnetName
-      //   properties: {
-      //     addressPrefix: '10.0.0.0/24'
-      //   }
-      // }
+      {
+        name: appgwSubnetName
+        properties: {
+          addressPrefix: '10.0.0.0/24'
+        }
+      }
       {
         name: webSubnetName
         properties: {
@@ -97,6 +96,9 @@ resource webDbVnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
       }
     ]
   }
+  resource appGwSubnet 'subnets' existing = {
+    name: appgwSubnetName
+  }
   resource webSubnet 'subnets' existing = {
     name: webSubnetName
   }
@@ -105,17 +107,11 @@ resource webDbVnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
   }
 }
 
-// // create azure bastion after hub vnet creattion if deployAzureBastion is true
-// module createAzureBastion './bastion.bicep' = if(deployAzureBastion) {
-//   name: 'createAzureBastion'
-//   params: {
-//     location: location
-//   }
-//   dependsOn: [
-//     hubVnet
-//   ]
-// }
-
+@description('The ID of the virtual network.')
 output webDbVnetId string = webDbVnet.id
+@description('The ID of the application gateway subnet.')
+output appGwSubnetId string = webDbVnet::appGwSubnet.id
+@description('The ID of the web subnet.')
 output webSubnetId string = webDbVnet::webSubnet.id
+@description('The ID of the database subnet.')
 output dbSubnetId string = webDbVnet::dbSubnet.id
