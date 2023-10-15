@@ -1,22 +1,11 @@
 param location string
-param appGwVnetName string
+
+@description('Azure Application Gateway backend pool vm private IPs.')
 param backendVmPrivateIps array
+@description('Azure Application Gateway subnet ID.')
+param appGwSubnetId string
 
-var appGwAddressPrefix = '10.0.0.0/24'
-var appGwSubnetName = 'subnet-appgw'
 var appGwName = 'appgw-public'
-
-resource hubVnet 'Microsoft.Network/virtualNetworks@2023-04-01' existing = {
-  name: appGwVnetName
-}
-
-resource appgwSubnet 'Microsoft.Network/virtualNetworks/subnets@2023-04-01' = {
-  name: appGwSubnetName
-  parent: hubVnet
-  properties: {
-    addressPrefix: appGwAddressPrefix
-  }
-}
 
 resource appgwPip 'Microsoft.Network/publicIPAddresses@2023-04-01' = {
   name: '${appGwName}-pip'
@@ -43,7 +32,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
         name: 'appGwIpConfig'
         properties: {
           subnet: {
-            id: appgwSubnet.id
+            id: appGwSubnetId
           }
         }
       }
