@@ -7,11 +7,6 @@ param bastionEnabled string
 @minValue(1)
 @maxValue(3)
 param webVmCount int = 2
-@allowed([
-  'Enabled'
-  'Disabled'
-])
-param vmApacheEnabled string 
 
 param adminUsername string
 @secure()
@@ -19,8 +14,6 @@ param adminPassword string
 
 var vnetName = 'vnet-webdb'
 var deployBastion = bastionEnabled == 'Enabled'
-var installApache = vmApacheEnabled == 'Enabled'
-
 
 // create Vnet
 module createVnet './modules/vnet.bicep' = {
@@ -54,7 +47,6 @@ module createWebVms './modules/vm.bicep' = [for i in range(1, webVmCount):{
     adminPassword: adminPassword
     vmSize: 'Standard_B1s'
     vmZone: '${i}'
-    installApache: installApache
   }
 }]
 
@@ -71,5 +63,20 @@ module createAppGw './modules/appgw.bicep' = {
   ]
 }
 
-// create internal load balancer
+// not need create internal load balancer
 // create postgreSQL with private endpoints
+module createPostgreSql './modules/postgreSql.bicep' = {
+  name: 'createPostgreSql'
+  params: {
+    location: location
+    availabilityZone: '1'
+    postgreSqlAdminUser: adminUsername
+    postgreSqlAdminPassword: adminPassword
+    serverName: 'postgresql-${take(uniqueString(resourceGroup().id),4)}'
+    linkedVnetId: createVnet.outputs.webDbVnetId
+    dbSubnetId: createVnet.outputs.dbSubnetId
+  }
+  dependsOn: [
+    createVnet
+  ]
+}

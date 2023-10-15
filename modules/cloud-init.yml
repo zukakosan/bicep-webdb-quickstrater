@@ -1,0 +1,10 @@
+#cloud-config
+timezone: Asia/Tokyo
+package_upgrade: true
+package_update: true
+packages:
+  - git
+  - vim
+  - apache2
+run_cmd:
+  - sudo systemctl start apache2.service

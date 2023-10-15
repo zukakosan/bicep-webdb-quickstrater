@@ -3,8 +3,8 @@ param appGwVnetName string
 param backendVmPrivateIps array
 
 var appGwAddressPrefix = '10.0.0.0/24'
-var appGwSubnetName = 'appgw-subnet'
-var appGwName = 'appgw-front'
+var appGwSubnetName = 'subnet-appgw'
+var appGwName = 'appgw-public'
 
 resource hubVnet 'Microsoft.Network/virtualNetworks@2023-04-01' existing = {
   name: appGwVnetName

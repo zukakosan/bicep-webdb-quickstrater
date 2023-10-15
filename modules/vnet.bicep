@@ -82,6 +82,14 @@ resource webDbVnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
         name: dbSubnetName
         properties: {
           addressPrefix: '10.0.2.0/24'
+          delegations: [
+            {
+              name: 'Microsoft.DBforPostgreSQL/flexibleServers'
+              properties: {
+                serviceName: 'Microsoft.DBforPostgreSQL/flexibleServers'
+              }
+            }
+          ]
           networkSecurityGroup: {
             id: nsgDbSubnet.id
           }
@@ -91,6 +99,9 @@ resource webDbVnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
   }
   resource webSubnet 'subnets' existing = {
     name: webSubnetName
+  }
+  resource dbSubnet 'subnets' existing = {
+    name: dbSubnetName
   }
 }
 
@@ -105,4 +116,6 @@ resource webDbVnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
 //   ]
 // }
 
+output webDbVnetId string = webDbVnet.id
 output webSubnetId string = webDbVnet::webSubnet.id
+output dbSubnetId string = webDbVnet::dbSubnet.id
