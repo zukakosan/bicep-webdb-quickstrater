@@ -2,7 +2,7 @@
 This repository can be used for quick depoloyment of web-db system using IaaS as web server and PostgreSQL as database. `main.bicep` deploys the components of the architecture bellow.
 
 ## Architecture
-The overall architecture is like bellow. You can depoloy Azure Bastion as well by setting parameter(`'bastionEnabled'=='Enabled'`).
+The overall architecture is like bellow. You can depoloy Azure Bastion as well by setting parameter(`bastionEnabled == 'Enabled'`).
 ![](/imgs/webdb-arch.png)
 
 ## Deployment
