@@ -64,7 +64,7 @@ module createPostgreSql './modules/postgreSql.bicep' = {
     availabilityZone: '1'
     postgreSqlAdminUser: adminUsername
     postgreSqlAdminPassword: adminPassword
-    serverName: 'postgresql-${take(uniqueString(resourceGroup().id),4)}'
+    serverName: 'postgresql${take(uniqueString(resourceGroup().id),4)}'
     linkedVnetId: createVnet.outputs.webDbVnetId
     dbSubnetId: createVnet.outputs.dbSubnetId
   }
