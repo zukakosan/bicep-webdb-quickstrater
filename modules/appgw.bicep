@@ -17,6 +17,11 @@ resource appgwPip 'Microsoft.Network/publicIPAddresses@2023-04-01' = {
     publicIPAllocationMethod: 'Static'
     publicIPAddressVersion: 'IPv4'
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
 }
 
 resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' = {
@@ -116,4 +121,9 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2023-04-01' =
       maxCapacity: 10
     }
   }
+  zones:[
+    '1'
+    '2'
+    '3'
+  ]
 }
